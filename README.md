@@ -2,7 +2,7 @@
 
 A hands-on security lab demonstrating a low-bandwidth Denial-of-Service (DoS) attack and how to defend against it at the web-server layer. A **Slowloris** attack is launched against a local **nginx** server inside a VM, the resulting connection exhaustion is observed in **Netdata**, mitigation rules are added to nginx, and the attack is re-run to confirm the defense works.
 
-> Slowloris doesn't flood the network — it opens many connections and holds them open with deliberately slow, incomplete HTTP requests, exhausting the server's connection pool so legitimate users can't connect. The defense is to make nginx *impatient*: close any connection that doesn't finish its request quickly, and cap how many connections a single IP can hold.
+> Slowloris doesn't flood the network. It opens many connections and holds them open with deliberately slow, incomplete HTTP requests, exhausting the server's connection pool so legitimate users can't connect. The defense is to make nginx *impatient*: close any connection that doesn't finish its request quickly, and cap how many connections a single IP can hold.
 
 ## Tech / Tools
 
@@ -55,7 +55,7 @@ Added to the `server {}` block in `/etc/nginx/sites-available/default`:
 limit_conn addr 10;
 ```
 
-The short header/body timeouts are the primary Slowloris killer — nginx drops any connection that doesn't send a complete request within 5 seconds, which is exactly what Slowloris relies on *not* happening. `limit_conn` caps each IP to 10 simultaneous connections so a single source can't monopolize the pool.
+The short header/body timeouts are the primary Slowloris killer. nginx drops any connection that doesn't send a complete request within 5 seconds, which is exactly what Slowloris relies on *not* happening. `limit_conn` caps each IP to 10 simultaneous connections so a single source can't monopolize the pool.
 
 Applied with:
 
@@ -70,10 +70,9 @@ sudo nginx -t && sudo systemctl reload nginx
 
 ## Key Takeaways
 
-- **DoS isn't always about volume.** Slowloris uses almost no bandwidth — it exhausts the connection pool, not the network pipe. Defenses must match the attack type.
+- **DoS isn't always about volume.** Slowloris uses almost no bandwidth. It exhausts the connection pool, not the network pipe. Defenses must match the attack type.
 - **Generous default timeouts are an attack surface.** Tightening header/body timeouts neutralizes slow-rate attacks directly.
 - **Validate before applying** — `nginx -t && reload` should be muscle memory.
 
 ---
 
-*CYB102 — Unit 4, Project 4*
