@@ -2,7 +2,7 @@
 
 A hands-on security lab demonstrating a low-bandwidth Denial-of-Service (DoS) attack and how to defend against it at the web-server layer. A **Slowloris** attack is launched against a local **nginx** server inside a VM, the resulting connection exhaustion is observed in **Netdata**, mitigation rules are added to nginx, and the attack is re-run to confirm the defense works.
 
-> Slowloris doesn't flood the network. It opens many connections and holds them open with deliberately slow, incomplete HTTP requests, exhausting the server's connection pool so legitimate users can't connect. The defense is to make nginx *impatient*: close any connection that doesn't finish its request quickly, and cap how many connections a single IP can hold.
+> Slowloris doesn't rely on overwhelming the network with traffic. Instead, it opens a large number of connections and keeps them alive by sending slow, deliberately unfinished HTTP requests. This ties up the server's connection pool until there's no room left for legitimate users. The fix is to make nginx less patient. It should drop any connection that fails to complete its request quickly, and limit how many connections a single IP is allowed to hold at once.
 
 ## Tech / Tools
 
@@ -70,7 +70,7 @@ sudo nginx -t && sudo systemctl reload nginx
 
 ## Key Takeaways
 
-- **DoS isn't always about volume.** Slowloris uses almost no bandwidth. It exhausts the connection pool, not the network pipe. Defenses must match the attack type.
+- **DoS isn't always about volume.** Slowloris barely uses any bandwidth at all. What it drains is the connection pool, not the network itself. That's why the defense has to be matched to the type of attack you're actually facing.
 - **Generous default timeouts are an attack surface.** Tightening header/body timeouts neutralizes slow-rate attacks directly.
 - **Validate before applying** — `nginx -t && reload` should be muscle memory.
 
